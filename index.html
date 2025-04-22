@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellness Dashboard</title>
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f0f0f0;
+            --accent-bg: #e0e0e0;
+            --primary-text: #121212;
+            --secondary-text: #606060;
+            --accent-color: #333333;
+            --border-color: #d0d0d0;
+            --success-color: #2a2a2a;
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --font-family: 'JetBrains Mono', 'Courier New', monospace;
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary-bg: #121212;
+            --secondary-bg: #202020;
+            --accent-bg: #2a2a2a;
+            --primary-text: #fafafa;
+            --secondary-text: #b0b0b0;
+            --accent-color: #dddddd;
+            --border-color: #404040;
+            --success-color: #b0b0b0;
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--accent-bg);
+            padding: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Toggle switch styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 3px;
+            background-color: var(--accent-color);
+            transition: var(--transition);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(28px);
+        }
+
+        .slider.round {
+            border-radius: 30px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: 3fr 2fr;
+            gap: 1rem;
+            padding: 1rem;
+            height: calc(100% - 60px);
+            /* Adjust based on header height */
+            overflow: hidden;
+        }
+
+        .stats-section {
+            grid-column: 1 / -1;
+        }
+
+        .card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .btn {
+            background-color: var(--accent-bg);
+            color: var(--primary-text);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-family);
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            text-align: center;
+            margin: 0.5rem 0;
+            font-weight: bold;
+        }
+
+        .timer-info {
+            text-align: center;
+            color: var(--secondary-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-option {
+            background-color: var(--accent-bg);
+            color: var(--primary-text);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-family);
+            font-size: 0.8rem;
+        }
+
+        .timer-option.active {
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+        }
+
+        .custom-interval {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .custom-interval input {
+            width: 60px;
+            padding: 0.25rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            border-radius: 4px;
+            font-family: var(--font-family);
+        }
+
+        /* Progress bar styles */
+        .progress-container {
+            background-color: var(--accent-bg);
+            border-radius: 4px;
+            height: 8px;
+            width: 100%;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            height: 100%;
+        }
+
+        .stat-card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .streak-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.25rem;
+        }
+
+        .streak-count {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background-color: var(--primary-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .modal-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: var(--font-family);
+            background-color: var(--secondary-bg);
+            color: var(--primary-text);
+        }
+
+        .chart-container {
+            height: calc(100% - 50px);
+            position: relative;
+            margin-top: 1rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background-color: var(--accent-color);
+            min-height: 4px;
+            transition: height 0.3s ease;
+            position: relative;
+        }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+        }
+
+        .chart-day-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            position: absolute;
+            bottom: -25px;
+        }
+
+        .chart-label {
+            font-size: 0.75rem;
+            color: var(--secondary-text);
+            text-align: center;
+            width: 14%;
+            /* 100% / 7 days */
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-bg);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 992px) {
+            main {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: repeat(3, 1fr);
+            }
+
+            .stats-section {
+                grid-column: 1 / -1;
+                grid-row: 3;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+                height: calc(100vh - 60px);
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .card {
+                min-height: 300px;
+            }
+
+            .timer-display {
+                font-size: 1.5rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .stats-section {
+                height: auto;
+            }
+        }
+
+        /* Font loading */
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/jetbrains-mono/2.242/web/woff2/JetBrainsMono-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/jetbrains-mono/2.242/web/woff2/JetBrainsMono-Bold.woff2') format('woff2');
+            font-weight: bold;
+            font-style: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">Wellness Dashboard</div>
+        <div class="theme-toggle">
+            <span>🌙</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span>☀️</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hydration Tracker -->
+        <div class="card" id="hydration-tracker">
+            <h2 class="card-title">Hydration Tracker</h2>
+            <div class="timer-display" id="hydration-timer">00:00</div>
+            <div class="timer-info" id="hydration-info">Select an interval to start tracking</div>
+
+            <div class="timer-options">
+                <button class="timer-option" data-time="30">30 min</button>
+                <button class="timer-option" data-time="45">45 min</button>
+                <button class="timer-option" data-time="60">60 min</button>
+                <button class="timer-option" data-time="90">90 min</button>
+            </div>
+
+            <div class="custom-interval">
+                <label for="custom-hydration">Custom:</label>
+                <input type="number" id="custom-hydration" min="1" max="240" placeholder="Min">
+                <button class="btn" id="set-custom-hydration">Set</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" id="start-hydration">Start</button>
+                <button class="btn" id="pause-hydration">Pause</button>
+                <button class="btn" id="reset-hydration">Reset</button>
+            </div>
+        </div>
+
+        <!-- Movement Reminder -->
+        <div class="card" id="movement-reminder">
+            <h2 class="card-title">Movement Reminder</h2>
+            <div class="timer-display" id="movement-timer">00:00</div>
+            <div class="timer-info" id="movement-info">Select work/break cycle</div>
+
+            <div class="timer-options">
+                <button class="timer-option" data-work="60" data-break="5">60:5</button>
+                <button class="timer-option" data-work="90" data-break="10">90:10</button>
+            </div>
+
+            <div class="custom-interval">
+                <label for="custom-work">Work:</label>
+                <input type="number" id="custom-work" min="1" max="240" placeholder="Min">
+                <label for="custom-break">Break:</label>
+                <input type="number" id="custom-break" min="1" max="60" placeholder="Min">
+                <button class="btn" id="set-custom-movement">Set</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" id="start-movement">Start</button>
+                <button class="btn" id="pause-movement">Pause</button>
+                <button class="btn" id="reset-movement">Reset</button>
+            </div>
+        </div>
+
+        <!-- Pomodoro Timer -->
+        <div class="card" id="pomodoro-timer">
+            <h2 class="card-title">Pomodoro Timer</h2>
+            <div class="timer-display" id="pomodoro-timer-display">00:00</div>
+            <div class="timer-info" id="pomodoro-info">Select a pomodoro cycle</div>
+
+            <div class="timer-options">
+                <button class="timer-option" data-work="25" data-break="5">25:5</button>
+                <button class="timer-option" data-work="50" data-break="10">50:10</button>
+                <button class="timer-option" data-work="90" data-break="15">90:15</button>
+            </div>
+
+            <div class="custom-interval">
+                <label for="custom-pomo-work">Work:</label>
+                <input type="number" id="custom-pomo-work" min="1" max="120" placeholder="Min">
+                <label for="custom-pomo-break">Break:</label>
+                <input type="number" id="custom-pomo-break" min="1" max="30" placeholder="Min">
+                <button class="btn" id="set-custom-pomodoro">Set</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" id="start-pomodoro">Start</button>
+                <button class="btn" id="pause-pomodoro">Pause</button>
+                <button class="btn" id="reset-pomodoro">Reset</button>
+            </div>
+        </div>
+
+        <!-- Stats & Streaks Section -->
+        <div class="card stats-section">
+            <h2 class="card-title">Stats & Streaks</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Hydration Today</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="hydration-progress"></div>
+                    </div>
+                    <div class="streak-info">
+                        <span>Current Streak:</span>
+                        <span class="streak-count" id="hydration-streak">0</span>
+                    </div>
+                    <div class="streak-info">
+                        <span>Total Today:</span>
+                        <span class="streak-count" id="hydration-total">0</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Movement Today</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="movement-progress"></div>
+                    </div>
+                    <div class="streak-info">
+                        <span>Current Streak:</span>
+                        <span class="streak-count" id="movement-streak">0</span>
+                    </div>
+                    <div class="streak-info">
+                        <span>Total Today:</span>
+                        <span class="streak-count" id="movement-total">0</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Pomodoro Today</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="pomodoro-progress"></div>
+                    </div>
+                    <div class="streak-info">
+                        <span>Current Streak:</span>
+                        <span class="streak-count" id="pomodoro-streak">0</span>
+                    </div>
+                    <div class="streak-info">
+                        <span>Total Today:</span>
+                        <span class="streak-count" id="pomodoro-total">0</span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Email Modal -->
+    <div class="modal-overlay" id="email-modal">
+        <div class="modal">
+            <h2 class="modal-title">Welcome to Wellness Dashboard</h2>
+            <div class="modal-content">
+                <p>Please enter your email to get started. We'll <b>use the email to verify your identity.</b></p>
+            </div>
+            <form class="modal-form" id="email-form">
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" required placeholder="your@email.com">
+                    <small>By clicking on submit, you agree to our <a
+                        href="https://docs.google.com/document/d/1Vp3T7EOzqbfqRdMIh1Ph1eWjpfw9GIaGzP86Ron7MGc/edit?usp=sharing"
+                        target="_blank">Terms & Conditions</a>
+                      and
+                      <a href="https://docs.google.com/document/d/1Vp3T7EOzqbfqRdMIh1Ph1eWjpfw9GIaGzP86Ron7MGc/edit?usp=sharing"
+                        target="_blank">Privacy Policy</a></small>
+                </div>
+                <button type="submit" class="btn">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Permission Modal -->
+    <div class="modal-overlay" id="notification-modal" style="display: none;">
+        <div class="modal">
+            <h2 class="modal-title">Allow Notifications</h2>
+            <div class="modal-content">
+                <p>To get the most out of your wellness dashboard, please allow browser notifications for hydration,
+                    movement, and pomodoro alerts.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="allow-notifications">Allow</button>
+                <button class="btn" id="skip-notifications">Skip for Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-content">Notification message here</div>
+    </div>
+
+
+    <!-- Audio Elements -->
+    <audio id="hydration-sound" src="sounds/water.mp3" preload="auto"></audio>
+    <audio id="movement-sound" src="sounds/move.mp3" preload="auto"></audio>
+    <audio id="pomodoro-sound" src="sounds/pomodoro.mp3" preload="auto"></audio>
+    <audio id="work-sound" src="sounds/work.mp3" preload="auto"></audio>
+
+    <!-- Action Modal -->
+    <div class="modal-overlay" id="action-modal" style="display: none;">
+        <div class="modal">
+            <h2 class="modal-title" id="action-modal-title">Time to Act!</h2>
+            <div class="modal-content">
+                <p id="action-modal-message">It's time for your scheduled activity!</p>
+                <div class="timer-display" id="action-countdown">00:00</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="action-complete-btn">I did it!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to track all timers
+        let activeTimers = [];
+
+        // UTILITY FUNCTIONS
+        function formatTime(timeInSeconds) {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = timeInSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.querySelector('.notification-content').textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function sendBrowserNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"/></svg>'
+                });
+            } else {
+                showNotification(body);
+            }
+        }
+
+        // LOCAL STORAGE FUNCTIONS
+        function saveToLocalStorage(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function getFromLocalStorage(key, defaultValue = null) {
+            const stored = localStorage.getItem(key);
+            return stored ? JSON.parse(stored) : defaultValue;
+        }
+
+        // DATE FUNCTIONS
+        function getTodayKey() {
+            const date = new Date();
+            return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        }
+
+        function getLastSevenDays() {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`);
+            }
+            return days;
+        }
+
+        // STATS & STREAKS FUNCTIONS
+        function initStats() {
+            const todayKey = getTodayKey();
+
+            // Initialize today's stats if not exists
+            if (!getFromLocalStorage(`hydration_${todayKey}`)) {
+                saveToLocalStorage(`hydration_${todayKey}`, { count: 0, target: 8 });
+            }
+
+            if (!getFromLocalStorage(`movement_${todayKey}`)) {
+                saveToLocalStorage(`movement_${todayKey}`, { count: 0, target: 8 });
+            }
+
+            if (!getFromLocalStorage(`pomodoro_${todayKey}`)) {
+                saveToLocalStorage(`pomodoro_${todayKey}`, { count: 0, target: 8 });
+            }
+
+            // Initialize streaks if not exists
+            if (!getFromLocalStorage('hydration_streak')) {
+                saveToLocalStorage('hydration_streak', 0);
+            }
+
+            if (!getFromLocalStorage('movement_streak')) {
+                saveToLocalStorage('movement_streak', 0);
+            }
+
+            if (!getFromLocalStorage('pomodoro_streak')) {
+                saveToLocalStorage('pomodoro_streak', 0);
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const todayKey = getTodayKey();
+
+            // Update hydration stats
+            const hydrationStats = getFromLocalStorage(`hydration_${todayKey}`, { count: 0, target: 8 });
+            const hydrationProgress = (hydrationStats.count / hydrationStats.target) * 100;
+            document.getElementById('hydration-progress').style.width = `${Math.min(hydrationProgress, 100)}%`;
+            document.getElementById('hydration-streak').textContent = getFromLocalStorage('hydration_streak', 0);
+            document.getElementById('hydration-total').textContent = hydrationStats.count;
+
+            // Update movement stats
+            const movementStats = getFromLocalStorage(`movement_${todayKey}`, { count: 0, target: 8 });
+            const movementProgress = (movementStats.count / movementStats.target) * 100;
+            document.getElementById('movement-progress').style.width = `${Math.min(movementProgress, 100)}%`;
+            document.getElementById('movement-streak').textContent = getFromLocalStorage('movement_streak', 0);
+            document.getElementById('movement-total').textContent = movementStats.count;
+
+            // Update pomodoro stats
+            const pomodoroStats = getFromLocalStorage(`pomodoro_${todayKey}`, { count: 0, target: 8 });
+            const pomodoroProgress = (pomodoroStats.count / pomodoroStats.target) * 100;
+            document.getElementById('pomodoro-progress').style.width = `${Math.min(pomodoroProgress, 100)}%`;
+            document.getElementById('pomodoro-streak').textContent = getFromLocalStorage('pomodoro_streak', 0);
+            document.getElementById('pomodoro-total').textContent = pomodoroStats.count;
+
+            // Update weekly chart
+            updateWeeklyChart();
+        }
+
+        function incrementStat(type) {
+            const todayKey = getTodayKey();
+            const stats = getFromLocalStorage(`${type}_${todayKey}`, { count: 0, target: 8 });
+            stats.count += 1;
+            saveToLocalStorage(`${type}_${todayKey}`, stats);
+
+            // Increment streak
+            const streak = getFromLocalStorage(`${type}_streak`, 0);
+            saveToLocalStorage(`${type}_streak`, streak + 1);
+
+            updateStats();
+        }
+
+        function updateWeeklyChart() {
+            const chartContainer = document.getElementById('weekly-chart');
+            const dayContainer = document.getElementById('chart-days');
+
+            // Check if elements exist before manipulating them
+            if (!chartContainer || !dayContainer) return;
+
+            chartContainer.innerHTML = '';
+            dayContainer.innerHTML = '';
+
+            const days = getLastSevenDays();
+            const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            days.forEach((day, index) => {
+                const hydrationData = getFromLocalStorage(`hydration_${day}`, { count: 0 });
+                const movementData = getFromLocalStorage(`movement_${day}`, { count: 0 });
+                const pomodoroData = getFromLocalStorage(`pomodoro_${day}`, { count: 0 });
+
+                // Calculate the max value for scaling
+                const maxValue = Math.max(hydrationData.count, movementData.count, pomodoroData.count, 1);
+
+                // Create bar groups
+                const barGroup = document.createElement('div');
+                barGroup.style.display = 'flex';
+                barGroup.style.flexDirection = 'column';
+                barGroup.style.alignItems = 'center';
+                barGroup.style.gap = '4px';
+                barGroup.style.flex = '1';
+
+                // Create hydration bar
+                const hydrationBar = document.createElement('div');
+                hydrationBar.className = 'chart-bar';
+                hydrationBar.style.height = `${(hydrationData.count / maxValue) * 100}%`;
+                hydrationBar.style.backgroundColor = 'var(--accent-color)';
+                hydrationBar.setAttribute('data-value', hydrationData.count);
+
+                // Create movement bar
+                const movementBar = document.createElement('div');
+                movementBar.className = 'chart-bar';
+                movementBar.style.height = `${(movementData.count / maxValue) * 100}%`;
+                movementBar.style.backgroundColor = 'var(--secondary-text)';
+                movementBar.setAttribute('data-value', movementData.count);
+
+                // Create pomodoro bar
+                const pomodoroBar = document.createElement('div');
+                pomodoroBar.className = 'chart-bar';
+                pomodoroBar.style.height = `${(pomodoroData.count / maxValue) * 100}%`;
+                pomodoroBar.style.backgroundColor = 'var(--border-color)';
+                pomodoroBar.setAttribute('data-value', pomodoroData.count);
+
+                // Add bars to group
+                barGroup.appendChild(hydrationBar);
+                barGroup.appendChild(movementBar);
+                barGroup.appendChild(pomodoroBar);
+
+                // Add group to chart
+                chartContainer.appendChild(barGroup);
+
+                // Create day label
+                const date = new Date(day.split('-')[0], day.split('-')[1] - 1, day.split('-')[2]);
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'chart-label';
+                dayLabel.textContent = dayLabels[date.getDay()];
+                dayContainer.appendChild(dayLabel);
+            });
+        }
+
+        // Functions to pause and resume all timers
+        function pauseAllTimersExcept(exceptTimer) {
+            activeTimers.forEach(timer => {
+                if (timer !== exceptTimer && timer.isRunning && !timer.isPaused) {
+                    timer.wasRunningBeforeModal = true;
+                    timer.pause();
+                }
+            });
+        }
+
+        function resumeAllTimers() {
+            activeTimers.forEach(timer => {
+                if (timer.wasRunningBeforeModal) {
+                    timer.wasRunningBeforeModal = false;
+                    timer.start();
+                }
+            });
+        }
+
+        // TIMER CLASS
+        class Timer {
+            constructor(displayElement, infoElement, type) {
+                this.displayElement = displayElement;
+                this.infoElement = infoElement;
+                this.type = type;
+                this.timeLeft = 0;
+                this.totalTime = 0;
+                this.interval = null;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.isBreak = false;
+                this.workTime = 0;
+                this.breakTime = 0;
+                this.cycles = 0;
+                this.breakCountdown = null;
+                this.wasRunningBeforeModal = false;
+
+                // Register this timer in active timers
+                activeTimers.push(this);
+
+                // Set sound references
+                try {
+                    this.actionSound = null;
+                    this.workSound = document.getElementById('work-sound');
+
+                    // Set sound based on timer type
+                    if (type === 'hydration') {
+                        this.actionSound = document.getElementById('hydration-sound');
+                        this.setTime(60); // Default 60 minutes
+                    } else if (type === 'movement') {
+                        this.actionSound = document.getElementById('movement-sound');
+                        this.setWorkBreakTime(60, 5); // Default 60:5
+                    } else if (type === 'pomodoro') {
+                        this.actionSound = document.getElementById('pomodoro-sound');
+                        this.setWorkBreakTime(25, 5); // Default 25:5
+                    }
+                } catch (e) {
+                    console.error("Error initializing sounds:", e);
+                }
+            }
+
+            setTime(minutes) {
+                this.totalTime = minutes * 60;
+                this.timeLeft = this.totalTime;
+                this.displayElement.textContent = formatTime(this.timeLeft);
+                this.infoElement.textContent = `${minutes} minute timer set`;
+            }
+
+            setWorkBreakTime(workMinutes, breakMinutes) {
+                this.workTime = workMinutes * 60;
+                this.breakTime = breakMinutes * 60;
+                this.totalTime = this.workTime;
+                this.timeLeft = this.totalTime;
+                this.isBreak = false;
+                this.displayElement.textContent = formatTime(this.timeLeft);
+                this.infoElement.textContent = `Work: ${workMinutes}min / Break: ${breakMinutes}min`;
+            }
+
+            start() {
+                // Clear any existing interval to prevent duplicates
+                if (this.interval) {
+                    clearInterval(this.interval);
+                }
+
+                // Always set these states to ensure proper starting
+                this.isRunning = true;
+                this.isPaused = false;
+                this.infoElement.textContent = this.isBreak ? 'Break time!' : 'Work time!';
+
+                // Start the timer interval
+                this.interval = setInterval(() => {
+                    if (this.timeLeft > 0) {
+                        this.timeLeft--;
+                        this.displayElement.textContent = formatTime(this.timeLeft);
+                    } else {
+                        // Timer complete
+                        clearInterval(this.interval);
+
+                        if (this.type === 'hydration') {
+                            this.showActionModal('Hydration Reminder', 'Time to drink water!', this.actionSound);
+                            this.timeLeft = this.totalTime;
+                            // For hydration, we'll increment immediately since it's a simple action
+                            incrementStat('hydration');
+                        } else if (this.type === 'movement') {
+                            if (this.isBreak) {
+                                this.showWorkModal('Movement Timer', 'Break over! Back to work.');
+                                this.isBreak = false;
+                                this.timeLeft = this.workTime;
+                                this.infoElement.textContent = 'Work time!';
+                            } else {
+                                this.showActionModal('Movement Timer', 'Time to move! Take a break.', this.actionSound);
+                                this.isBreak = true;
+                                this.timeLeft = this.breakTime;
+                                this.infoElement.textContent = 'Break time!';
+                                // For movement, increment when they start their break
+                                incrementStat('movement');
+                            }
+                        } else if (this.type === 'pomodoro') {
+                            if (this.isBreak) {
+                                this.showWorkModal('Pomodoro', 'Break over! Starting work cycle.');
+                                this.isBreak = false;
+                                this.timeLeft = this.workTime;
+                                this.infoElement.textContent = 'Work time!';
+                                this.cycles++;
+                            } else {
+                                this.showActionModal('Pomodoro', 'Work cycle complete! Take a break.', this.actionSound);
+                                this.isBreak = true;
+                                this.timeLeft = this.breakTime;
+                                this.infoElement.textContent = 'Break time!';
+                                // For pomodoro, increment when work cycle is completed
+                                incrementStat('pomodoro');
+                            }
+                        }
+                        this.displayElement.textContent = formatTime(this.timeLeft);
+                    }
+                }, 1000);
+            }
+
+            pause() {
+                if (!this.isRunning || this.isPaused) return;
+
+                clearInterval(this.interval);
+                this.isPaused = true;
+                this.infoElement.textContent = 'Paused';
+            }
+
+            reset() {
+                clearInterval(this.interval);
+                clearInterval(this.breakCountdown);
+
+                // Close modal if open
+                const actionModal = document.getElementById('action-modal');
+                if (actionModal && actionModal.style.display === 'flex') {
+                    actionModal.style.display = 'none';
+
+                    // Resume all other timers that were paused
+                    resumeAllTimers();
+                }
+
+                this.isRunning = false;
+                this.isPaused = false;
+                this.isBreak = false;
+                this.wasRunningBeforeModal = false;
+
+                // Stop any playing sounds
+                this.stopAllSounds();
+
+                if (this.type === 'hydration') {
+                    this.timeLeft = this.totalTime;
+                    this.displayElement.textContent = formatTime(this.timeLeft);
+                    this.infoElement.textContent = `${this.totalTime / 60} minute timer set`;
+                } else {
+                    this.timeLeft = this.workTime;
+                    this.displayElement.textContent = formatTime(this.timeLeft);
+                    this.infoElement.textContent = `Work: ${this.workTime / 60}min / Break: ${this.breakTime / 60}min`;
+                    if (this.type === 'pomodoro') {
+                        this.cycles = 0;
+                    }
+                }
+            }
+
+            stopAllSounds() {
+                // Stop action sound if playing
+                if (this.actionSound) {
+                    this.actionSound.pause();
+                    this.actionSound.currentTime = 0;
+                }
+
+                // Stop work sound if playing
+                if (this.workSound) {
+                    this.workSound.pause();
+                    this.workSound.currentTime = 0;
+                }
+            }
+
+            showActionModal(title, message, sound) {
+                const modal = document.getElementById('action-modal');
+                const modalTitle = document.getElementById('action-modal-title');
+                const modalMessage = document.getElementById('action-modal-message');
+                const actionButton = document.getElementById('action-complete-btn');
+                const actionCountdown = document.getElementById('action-countdown');
+
+                // Pause all other timers
+                pauseAllTimersExcept(this);
+
+                // Set modal content
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+
+                if (this.type === 'hydration') {
+                    // For hydration, simply show a button to confirm they drank water
+                    actionButton.textContent = "I did it!";
+                    actionCountdown.style.display = 'none';
+                    modal.style.display = 'flex';
+
+                    // Play hydration sound
+                    try {
+                        if (sound) {
+                            sound.loop = true;
+                            sound.play().catch(e => console.log("Error playing sound:", e));
+                        }
+                    } catch (e) {
+                        console.error("Error playing sound:", e);
+                    }
+
+                    // Set button action for hydration
+                    actionButton.onclick = () => {
+                        modal.style.display = 'none';
+                        if (sound) {
+                            sound.pause();
+                            sound.currentTime = 0;
+                        }
+
+                        // Force the timer to run
+                        this.isRunning = true;
+                        this.isPaused = false;
+                        this.start(); // Resume the timer
+
+                        // Resume all other timers
+                        resumeAllTimers();
+                    };
+                } else {
+                    // Create variable to track button state
+                    let breakStarted = false;
+
+                    // For pomodoro and movement, show "Starting it" button
+                    actionButton.textContent = "Starting it";
+                    actionCountdown.style.display = 'none';
+                    modal.style.display = 'flex';
+
+                    // Play action sound in loop until user acknowledges
+                    try {
+                        if (sound) {
+                            sound.loop = true;
+                            sound.play().catch(e => console.log("Error playing sound:", e));
+                        }
+                    } catch (e) {
+                        console.error("Error playing sound:", e);
+                    }
+
+                    // When user clicks "Starting it" button
+                    actionButton.onclick = () => {
+                        // First click - "Starting it"
+                        if (!breakStarted) {
+                            breakStarted = true;
+
+                            // Stop the action sound
+                            if (sound) {
+                                sound.pause();
+                                sound.currentTime = 0;
+                            }
+
+                            // Change button text for when break is over
+                            actionButton.textContent = "I am back to work now";
+
+                            // Start break countdown
+                            let breakTimeLeft = this.breakTime;
+
+                            // Show and update countdown
+                            actionCountdown.style.display = 'block';
+                            actionCountdown.textContent = formatTime(breakTimeLeft);
+
+                            // Update message
+                            modalMessage.textContent = `You have ${formatTime(breakTimeLeft)} for your break.`;
+
+                            // Start break countdown interval
+                            this.breakCountdown = setInterval(() => {
+                                breakTimeLeft--;
+
+                                if (breakTimeLeft > 0) {
+                                    // Update countdown display
+                                    actionCountdown.textContent = formatTime(breakTimeLeft);
+                                    modalMessage.textContent = `You have ${formatTime(breakTimeLeft)} for your break.`;
+                                } else {
+                                    // Break time over
+                                    clearInterval(this.breakCountdown);
+
+                                    // Update message
+                                    modalMessage.textContent = "Break time over! Time to get back to work.";
+
+                                    // Play work sound
+                                    try {
+                                        if (this.workSound) {
+                                            this.workSound.loop = true;
+                                            this.workSound.play().catch(e => console.log("Error playing work sound:", e));
+                                        }
+                                    } catch (e) {
+                                        console.error("Error playing work sound:", e);
+                                    }
+                                }
+                            }, 1000);
+                        } else {
+                            // Second click - "I am back to work"
+                            // Clear the countdown
+                            clearInterval(this.breakCountdown);
+
+                            // Close modal
+                            modal.style.display = 'none';
+
+                            // Stop work sound if it's playing
+                            if (this.workSound) {
+                                this.workSound.pause();
+                                this.workSound.currentTime = 0;
+                            }
+
+                            // Force the timer to run
+                            this.isRunning = true;
+                            this.isPaused = false;
+                            this.start(); // Resume the timer
+
+                            // Resume all other timers
+                            resumeAllTimers();
+                        }
+                    };
+                }
+
+                // Send browser notification
+                sendBrowserNotification(title, message);
+            }
+
+            showWorkModal(title, message) {
+                const modal = document.getElementById('action-modal');
+                const modalTitle = document.getElementById('action-modal-title');
+                const modalMessage = document.getElementById('action-modal-message');
+                const actionButton = document.getElementById('action-complete-btn');
+                const actionCountdown = document.getElementById('action-countdown');
+
+                // Pause all other timers
+                pauseAllTimersExcept(this);
+
+                // Setup modal
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                actionButton.textContent = "I am back to work now";
+
+                // Hide countdown
+                actionCountdown.style.display = 'none';
+
+                // Show modal
+                modal.style.display = 'flex';
+
+                // Play work sound
+                try {
+                    if (this.workSound) {
+                        this.workSound.loop = true;
+                        this.workSound.play().catch(e => console.log("Error playing work sound:", e));
+                    }
+                } catch (e) {
+                    console.error("Error playing work sound:", e);
+                }
+
+                // When the user confirms they're back to work
+                actionButton.onclick = () => {
+                    modal.style.display = 'none';
+
+                    // Stop work sound
+                    if (this.workSound) {
+                        this.workSound.pause();
+                        this.workSound.currentTime = 0;
+                    }
+
+                    // Force the timer to run
+                    this.isRunning = true;
+                    this.isPaused = false;
+                    this.start(); // Resume the timer
+
+                    // Resume all other timers
+                    resumeAllTimers();
+                };
+
+                // Send browser notification
+                sendBrowserNotification(title, message);
+            }
+        }
+
+        // THEME TOGGLE
+        function initTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (!themeToggle) return;
+
+            const savedTheme = localStorage.getItem('theme');
+
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.checked = true;
+            }
+
+            themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
+
+        // EMAIL MODAL
+        function initEmailModal() {
+            const emailModal = document.getElementById('email-modal');
+            const emailForm = document.getElementById('email-form');
+            const notificationModal = document.getElementById('notification-modal');
+
+            if (!emailModal || !emailForm) return;
+
+            const email = localStorage.getItem('email');
+
+            if (!email) {
+                emailModal.style.display = 'flex';
+
+                emailForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const emailInput = document.getElementById('email').value;
+                    localStorage.setItem('email', emailInput);
+
+
+                    fetch("https://checkip.amazonaws.com/")
+                        .then(res => res.text())
+                        .then(ip => {
+                            const payload = {
+                                email: emailInput,
+                                ip: ip.trim()
+                            };
+
+                            // Send data using no-cors fetch
+                            fetch("https://script.google.com/macros/s/AKfycbzo25p01s_jTxpGPM3sMtieahXjzwpZQaZatmWaopeNXrUod4jXrWogezYVuD0e1CXA/exec", {
+                                method: "POST",
+                                mode: "no-cors",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            console.log("Data sent (no-cors)", payload);
+                        })
+                        .catch(err => console.error("IP fetch error:", err));
+
+                    emailModal.style.display = 'none';
+
+
+                    if (notificationModal) {
+                        notificationModal.style.display = 'flex';
+                    }
+                });
+            } else {
+                emailModal.style.display = 'none';
+
+                // Check if notification permission is already granted
+                if ('Notification' in window && Notification.permission !== 'granted' &&
+                    Notification.permission !== 'denied' && notificationModal) {
+                    notificationModal.style.display = 'flex';
+                }
+            }
+        }
+
+        // NOTIFICATION MODAL
+        function initNotificationModal() {
+            const notificationModal = document.getElementById('notification-modal');
+            if (!notificationModal) return;
+
+            const allowBtn = document.getElementById('allow-notifications');
+            const skipBtn = document.getElementById('skip-notifications');
+
+            if (allowBtn) {
+                allowBtn.addEventListener('click', () => {
+                    if ('Notification' in window) {
+                        Notification.requestPermission().then(permission => {
+                            if (permission === 'granted') {
+                                showNotification('Notifications enabled!');
+                            }
+                        });
+                    }
+                    notificationModal.style.display = 'none';
+                });
+            }
+
+            if (skipBtn) {
+                skipBtn.addEventListener('click', () => {
+                    notificationModal.style.display = 'none';
+                });
+            }
+        }
+
+        // Initialize the action modal
+        function initActionModal() {
+            // Initially hide the action modal
+            const actionModal = document.getElementById('action-modal');
+            if (actionModal) {
+                actionModal.style.display = 'none';
+
+                // Add event listener for Escape key to close modal
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && actionModal.style.display === 'flex') {
+                        // Find any active timer that has its sound playing and stop it
+                        activeTimers.forEach(timer => {
+                            timer.stopAllSounds();
+                        });
+
+                        // Close modal
+                        actionModal.style.display = 'none';
+
+                        // Resume all timers
+                        resumeAllTimers();
+                    }
+                });
+
+                // Add click event on modal overlay to close it
+                actionModal.addEventListener('click', (e) => {
+                    if (e.target === actionModal) {
+                        // Find any active timer that has its sound playing and stop it
+                        activeTimers.forEach(timer => {
+                            timer.stopAllSounds();
+                        });
+
+                        // Close modal
+                        actionModal.style.display = 'none';
+
+                        // Resume all timers
+                        resumeAllTimers();
+                    }
+                });
+            }
+
+            // Preload audio elements
+            const audioElements = [
+                'hydration-sound',
+                'movement-sound',
+                'pomodoro-sound',
+                'work-sound'
+            ];
+
+            audioElements.forEach(id => {
+                const audioElement = document.getElementById(id);
+                if (audioElement) {
+                    audioElement.load();
+                } else {
+                    console.warn(`Audio element with ID '${id}' not found.`);
+                }
+            });
+        }
+
+        // Initialize all timers with fixed event handlers
+        function initTimers() {
+            console.log("Initializing timers");
+
+            // HYDRATION TIMER
+            const hydrationDisplay = document.getElementById('hydration-timer');
+            const hydrationInfo = document.getElementById('hydration-info');
+
+            if (hydrationDisplay && hydrationInfo) {
+                const hydrationTimer = new Timer(hydrationDisplay, hydrationInfo, 'hydration');
+                hydrationTimer.setTime(60); // Default to 60 minutes
+
+                // Attach click handlers to hydration options
+                const hydrationOptions = document.querySelectorAll('#hydration-tracker .timer-option');
+                console.log(`Found ${hydrationOptions.length} hydration options`);
+
+                hydrationOptions.forEach(option => {
+                    option.addEventListener('click', function () {
+                        console.log(`Clicked hydration option: ${this.textContent}`);
+                        hydrationOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const timeValue = parseInt(this.getAttribute('data-time'));
+                        console.log(`Setting time to: ${timeValue} minutes`);
+                        if (timeValue) {
+                            hydrationTimer.setTime(timeValue);
+                        }
+                    });
+                });
+
+                // Hydration custom time handler
+                const setCustomHydrationBtn = document.getElementById('set-custom-hydration');
+                if (setCustomHydrationBtn) {
+                    setCustomHydrationBtn.addEventListener('click', function () {
+                        const customTimeInput = document.getElementById('custom-hydration');
+                        if (customTimeInput) {
+                            const customTime = parseInt(customTimeInput.value);
+                            console.log(`Setting custom hydration time: ${customTime} minutes`);
+                            if (customTime && customTime > 0) {
+                                hydrationOptions.forEach(opt => opt.classList.remove('active'));
+                                hydrationTimer.setTime(customTime);
+                            }
+                        }
+                    });
+                }
+
+                // Hydration control buttons
+                const startHydrationBtn = document.getElementById('start-hydration');
+                if (startHydrationBtn) {
+                    startHydrationBtn.addEventListener('click', function () {
+                        hydrationTimer.start();
+                    });
+                }
+
+                const pauseHydrationBtn = document.getElementById('pause-hydration');
+                if (pauseHydrationBtn) {
+                    pauseHydrationBtn.addEventListener('click', function () {
+                        hydrationTimer.pause();
+                    });
+                }
+
+                const resetHydrationBtn = document.getElementById('reset-hydration');
+                if (resetHydrationBtn) {
+                    resetHydrationBtn.addEventListener('click', function () {
+                        hydrationTimer.reset();
+                    });
+                }
+            }
+
+            // MOVEMENT TIMER
+            const movementDisplay = document.getElementById('movement-timer');
+            const movementInfo = document.getElementById('movement-info');
+
+            if (movementDisplay && movementInfo) {
+                const movementTimer = new Timer(movementDisplay, movementInfo, 'movement');
+                movementTimer.setWorkBreakTime(60, 5); // Default to 60:5
+
+                // Attach click handlers to movement options
+                const movementOptions = document.querySelectorAll('#movement-reminder .timer-option');
+                console.log(`Found ${movementOptions.length} movement options`);
+                movementOptions.forEach(option => {
+                    option.addEventListener('click', function () {
+                        console.log(`Clicked movement option: ${this.textContent}`);
+                        movementOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const workTime = parseInt(this.getAttribute('data-work'));
+                        const breakTime = parseInt(this.getAttribute('data-break'));
+                        console.log(`Setting work time: ${workTime} min, break time: ${breakTime} min`);
+
+                        if (workTime && breakTime) {
+                            movementTimer.setWorkBreakTime(workTime, breakTime);
+                        }
+                    });
+                });
+
+                // Movement custom time handler
+                const setCustomMovementBtn = document.getElementById('set-custom-movement');
+                if (setCustomMovementBtn) {
+                    setCustomMovementBtn.addEventListener('click', function () {
+                        const customWorkInput = document.getElementById('custom-work');
+                        const customBreakInput = document.getElementById('custom-break');
+
+                        if (customWorkInput && customBreakInput) {
+                            const customWork = parseInt(customWorkInput.value);
+                            const customBreak = parseInt(customBreakInput.value);
+
+                            console.log(`Setting custom movement times - Work: ${customWork} min, Break: ${customBreak} min`);
+
+                            if (customWork && customWork > 0 && customBreak && customBreak > 0) {
+                                movementOptions.forEach(opt => opt.classList.remove('active'));
+                                movementTimer.setWorkBreakTime(customWork, customBreak);
+                            }
+                        }
+                    });
+                }
+
+                // Movement control buttons
+                const startMovementBtn = document.getElementById('start-movement');
+                if (startMovementBtn) {
+                    startMovementBtn.addEventListener('click', function () {
+                        movementTimer.start();
+                    });
+                }
+
+                const pauseMovementBtn = document.getElementById('pause-movement');
+                if (pauseMovementBtn) {
+                    pauseMovementBtn.addEventListener('click', function () {
+                        movementTimer.pause();
+                    });
+                }
+
+                const resetMovementBtn = document.getElementById('reset-movement');
+                if (resetMovementBtn) {
+                    resetMovementBtn.addEventListener('click', function () {
+                        movementTimer.reset();
+                    });
+                }
+            }
+
+            // POMODORO TIMER
+            const pomodoroDisplay = document.getElementById('pomodoro-timer-display');
+            const pomodoroInfo = document.getElementById('pomodoro-info');
+
+            if (pomodoroDisplay && pomodoroInfo) {
+                const pomodoroTimer = new Timer(pomodoroDisplay, pomodoroInfo, 'pomodoro');
+                pomodoroTimer.setWorkBreakTime(25, 5); // Default to 25:5
+
+                // Attach click handlers to pomodoro options
+                const pomodoroOptions = document.querySelectorAll('#pomodoro-timer .timer-option');
+                console.log(`Found ${pomodoroOptions.length} pomodoro options`);
+
+                pomodoroOptions.forEach(option => {
+                    option.addEventListener('click', function () {
+                        console.log(`Clicked pomodoro option: ${this.textContent}`);
+                        pomodoroOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const workTime = parseInt(this.getAttribute('data-work'));
+                        const breakTime = parseInt(this.getAttribute('data-break'));
+                        console.log(`Setting work time: ${workTime} min, break time: ${breakTime} min`);
+
+                        if (workTime && breakTime) {
+                            pomodoroTimer.setWorkBreakTime(workTime, breakTime);
+                        }
+                    });
+                });
+
+                // Pomodoro custom time handler
+                const setCustomPomodoroBtn = document.getElementById('set-custom-pomodoro');
+                if (setCustomPomodoroBtn) {
+                    setCustomPomodoroBtn.addEventListener('click', function () {
+                        const customWorkInput = document.getElementById('custom-pomo-work');
+                        const customBreakInput = document.getElementById('custom-pomo-break');
+
+                        if (customWorkInput && customBreakInput) {
+                            const customWork = parseInt(customWorkInput.value);
+                            const customBreak = parseInt(customBreakInput.value);
+
+                            console.log(`Setting custom pomodoro times - Work: ${customWork} min, Break: ${customBreak} min`);
+
+                            if (customWork && customWork > 0 && customBreak && customBreak > 0) {
+                                pomodoroOptions.forEach(opt => opt.classList.remove('active'));
+                                pomodoroTimer.setWorkBreakTime(customWork, customBreak);
+                            }
+                        }
+                    });
+                }
+
+                // Pomodoro control buttons
+                const startPomodoroBtn = document.getElementById('start-pomodoro');
+                if (startPomodoroBtn) {
+                    startPomodoroBtn.addEventListener('click', function () {
+                        pomodoroTimer.start();
+                    });
+                }
+
+                const pausePomodoroBtn = document.getElementById('pause-pomodoro');
+                if (pausePomodoroBtn) {
+                    pausePomodoroBtn.addEventListener('click', function () {
+                        pomodoroTimer.pause();
+                    });
+                }
+
+                const resetPomodoroBtn = document.getElementById('reset-pomodoro');
+                if (resetPomodoroBtn) {
+                    resetPomodoroBtn.addEventListener('click', function () {
+                        pomodoroTimer.reset();
+                    });
+                }
+            }
+        }
+
+        // Setup application
+        function initApp() {
+            console.log("Initializing application");
+
+            // Make sure audio elements are added to the DOM before initialization
+            if (!document.getElementById('hydration-sound')) {
+                console.log("Adding audio elements");
+                // Add audio elements if not present
+                const audioContainer = document.createElement('div');
+                audioContainer.style.display = 'none';
+                audioContainer.innerHTML = `
+            <audio id="hydration-sound" src="sounds/water.mp3" preload="auto"></audio>
+            <audio id="movement-sound" src="sounds/move.mp3" preload="auto"></audio>
+            <audio id="pomodoro-sound" src="sounds/pomodoro.mp3" preload="auto"></audio>
+            <audio id="work-sound" src="sounds/work.mp3" preload="auto"></audio>
+        `;
+                document.body.appendChild(audioContainer);
+            }
+
+            // Make sure action modal is added to the DOM before initialization
+            if (!document.getElementById('action-modal')) {
+                console.log("Adding action modal");
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = `
+            <div class="modal-overlay" id="action-modal" style="display: none;">
+                <div class="modal">
+                    <h2 class="modal-title" id="action-modal-title">Time to Act!</h2>
+                    <div class="modal-content">
+                        <p id="action-modal-message">It's time for your scheduled activity!</p>
+                        <div class="timer-display" id="action-countdown">00:00</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn" id="action-complete-btn">I did it!</button>
+                    </div>
+                </div>
+            </div>
+        `;
+                document.body.appendChild(modalContainer);
+            }
+
+            // Initialize all components
+            initTheme();
+            initEmailModal();
+            initNotificationModal();
+            initActionModal();
+            initStats();
+
+            // Initialize timers with a small delay to ensure DOM elements are ready
+            setTimeout(() => {
+                initTimers();
+                console.log("Timers initialized");
+                updateStats();
+            }, 100);
+        }
+
+        // Wait for DOM to be fully loaded, then initialize app
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                // First initialization attempt at DOMContentLoaded
+                initApp();
+            });
+        } else {
+            // DOM already loaded, initialize immediately
+            initApp();
+        }
+
+        // Also listen for window.load for maximum reliability
+        window.addEventListener('load', () => {
+            console.log("Window fully loaded - running final initialization");
+
+            // Add this backup timer initialization in case the first attempt failed
+            setTimeout(() => {
+                // Direct access to timer options as failsafe
+                document.querySelectorAll('.timer-option').forEach(option => {
+                    // Make sure we haven't already attached an event listener
+                    const alreadyHasHandler = option.getAttribute('data-handler-attached');
+                    if (alreadyHasHandler !== 'true') {
+                        option.setAttribute('data-handler-attached', 'true');
+
+                        option.addEventListener('click', function () {
+                            console.log(`Backup handler - clicked option: ${this.textContent}`);
+
+                            // Find the parent card to determine which timer this belongs to
+                            const parentCard = this.closest('.card');
+                            if (!parentCard) return;
+
+                            // Remove active class from all options in this timer
+                            parentCard.querySelectorAll('.timer-option').forEach(opt => {
+                                opt.classList.remove('active');
+                            });
+
+                            // Add active class to clicked option
+                            this.classList.add('active');
+
+                            // Set the appropriate timer
+                            if (parentCard.id === 'hydration-tracker') {
+                                const time = parseInt(this.getAttribute('data-time'));
+                                if (time) {
+                                    const timer = activeTimers.find(t => t.type === 'hydration');
+                                    if (timer) timer.setTime(time);
+                                }
+                            } else if (parentCard.id === 'movement-reminder') {
+                                const workTime = parseInt(this.getAttribute('data-work'));
+                                const breakTime = parseInt(this.getAttribute('data-break'));
+                                if (workTime && breakTime) {
+                                    const timer = activeTimers.find(t => t.type === 'movement');
+                                    if (timer) timer.setWorkBreakTime(workTime, breakTime);
+                                }
+                            } else if (parentCard.id === 'pomodoro-timer') {
+                                const workTime = parseInt(this.getAttribute('data-work'));
+                                const breakTime = parseInt(this.getAttribute('data-break'));
+                                if (workTime && breakTime) {
+                                    const timer = activeTimers.find(t => t.type === 'pomodoro');
+                                    if (timer) timer.setWorkBreakTime(workTime, breakTime);
+                                }
+                            }
+                        });
+                    }
+                });
+            }, 500);
+        });
+    </script>
+
+</body>
+
+</html>
